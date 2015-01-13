@@ -12,16 +12,16 @@ angular.module('firebaseHelper', ['firebase'])
 		};
 		
 		// $firebaseAuth wrapper
-		self.$auth = function(ref){
-			if(ref === undefined) ref = self.$ref(); // empty, use root by default
-			else if(angular.isString(ref)) ref = self.$ref(ref); // string/path
+		self.auth = function(ref){
+			if(ref === undefined) ref = self.ref(); // empty, use root by default
+			else if(angular.isString(ref)) ref = self.ref(ref); // string/path
 			else if(angular.isFunction(ref.$ref)) ref = ref.$ref; // Instance
 			
 			return $firebaseAuth(ref);
 		};
 		
 		// returns: Reference
-		self.$ref = function(){
+		self.ref = function(){
 			var args = Array.prototype.slice.call(arguments);
 			
 			var path = 'Ref/' + args.join('/');
@@ -34,7 +34,7 @@ angular.module('firebaseHelper', ['firebase'])
 		};
 		
 		// returns: Instance
-		self.$inst = function(){
+		self.inst = function(){
 			if(arguments.length == 1 && arguments[0] instanceof Firebase){
 				// accept/handle firebase $ref as argument too, not just string(s)
 				var ref  = arguments[0],
@@ -52,16 +52,16 @@ angular.module('firebaseHelper', ['firebase'])
 					path = 'Inst/' + args.join('/');
 				if(cached[path]) return cached[path];
 				
-				var $inst = $firebase(self.$ref.apply(this, args));
+				var $inst = $firebase(self.ref.apply(this, args));
 				cached[path] = $inst;
 			
 				return $inst;
 			}
 		};
 		
-		// returns: Object or Array
-		// i.e. if last argument === true, return Array instead of Object
-		self.$get = function(){
+		// returns: Object [or Array]
+		// N.B. if last argument === true, return Array instead of Object
+		self.object = function(){
 			var args = Array.prototype.slice.call(arguments),
 				type = 'Object';
 			
@@ -75,19 +75,25 @@ angular.module('firebaseHelper', ['firebase'])
 			if(cached[path]) return cached[path];
 			
 			// retrieve from remote, then cache it for later
-			var $get = self.$inst.apply(this, args)['$as'+type]();
+			var $get = self.inst.apply(this, args)['$as'+type]();
 			cached[path] = $get;
 			
 			return $get;
 		};
+		self.array = function(){
+			var args = Array.prototype.slice.call(arguments);
+			args.push(true); // append true as last argument
+			
+			return self.object.apply(this, args);
+		};
 		
 		// returns: promise for Object or Array
-		self.$load = function(){
-			return self.$get.apply(this, arguments).$loaded();
+		self.load = function(){
+			return self.get.apply(this, arguments).$loaded();
 		};
 		
 		// returns: Instance
-		self.$child = function(){
+		self.child = function(){
 			var args = Array.prototype.slice.call(arguments),
 				parent = args.shift();
 			
@@ -98,15 +104,15 @@ angular.module('firebaseHelper', ['firebase'])
 				parent = parent.$ref();
 			}
 			if(angular.isFunction(parent.child)){ // it's a Firebase Reference
-				return self.$inst(parent.child(args.join('/')));
+				return self.inst(parent.child(args.join('/')));
 			}
 			return parent; // fallback to parent
 		};
 		
 		// populate a list of keys with the model values they reference
-		self.$populate = function(keys, values, cbAdded){
+		self.populate = function(keys, values, cbAdded){
 			var array   = [],
-				keysRef = self.$ref(keys);
+				keysRef = self.ref(keys);
 			
 			// fire callback even if no keys found
 			keysRef.once('value', function(snapshot){
@@ -117,7 +123,7 @@ angular.module('firebaseHelper', ['firebase'])
 			
 			// watch for additions/deletions at keysRef
 			keysRef.on('child_added', function(snapshot){
-				var $item = self.$get(values, snapshot.key());
+				var $item = self.get(values, snapshot.key());
 				
 				$item.$loaded().then(function(){
 					var deferreds = [];
@@ -142,13 +148,13 @@ angular.module('firebaseHelper', ['firebase'])
 		};
 		
 		// @requires: external Firebase.util library: https://github.com/firebase/firebase-util
-		self.$intersect = function(keysPath, valuesPath, keysMap, valuesMap){
-			if( ! Firebase.util) throw new Error('$firebaseHelper.$intersect requires Firebase.util external library. See: https://github.com/firebase/firebase-util');
+		self.intersect = function(keysPath, valuesPath, keysMap, valuesMap){
+			if( ! Firebase.util) throw new Error('$firebaseHelper.intersect requires Firebase.util external library. See: https://github.com/firebase/firebase-util');
 			
 			// @TODO: cache somehow
 			
-			var keysObj   = {ref: self.$ref(keysPath)},
-				valuesObj = {ref: self.$ref(valuesPath)};
+			var keysObj   = {ref: self.ref(keysPath)},
+				valuesObj = {ref: self.ref(valuesPath)};
 			
 			if(keysMap)   keysObj.keyMap   = keysMap;
 			if(valuesMap) valuesObj.keyMap = valuesMap;
