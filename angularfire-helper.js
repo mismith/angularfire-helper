@@ -91,7 +91,7 @@ angular.module('firebaseHelper', ['firebase'])
 			
 			// returns: promise for Object or Array
 			self.load = function(){
-				return self.get.apply(this, arguments).$loaded();
+				return self.object.apply(this, arguments).$loaded();
 			};
 			
 			// returns: Instance
@@ -125,7 +125,7 @@ angular.module('firebaseHelper', ['firebase'])
 				
 				// watch for additions/deletions at keysRef
 				keysRef.on('child_added', function(snapshot){
-					var $item = self.get(values, snapshot.key());
+					var $item = self.object(values, snapshot.key());
 					
 					$item.$loaded().then(function(){
 						var deferreds = [];
