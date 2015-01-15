@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="firebaseHelperTest">
+<head>
+	<meta charset="UTF-8">
+</head>
+<body ng-controller="AppCtrl">
+	
+	<div style="display: table; width: 100%;">
+		<pre style="display: table-cell;"><h2>auth</h2>{{ auth }}</pre>
+		<pre style="display: table-cell;"><h2>parentRef</h2>{{ parentRef.path.toString() }}</pre>
+		<pre style="display: table-cell;"><h2>child1Inst</h2>{{ child1Inst.$ref().path.toString() }}</pre>
+		<pre style="display: table-cell;"><h2>child2Object</h2>{{ child2Object | json }}</pre>
+		<pre style="display: table-cell;"><h2>child3Array</h2>{{ child3Array | json }}</pre>
+		<pre style="display: table-cell;"><h2>child3Loaded</h2>{{ child3Loaded | json }}</pre>
+		<pre style="display: table-cell;"><h2>populated</h2>{{ populated | json }}</pre>
+	</div>
+	
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
+	
+	<script src="//cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
+	<script src="//cdn.firebase.com/libs/angularfire/0.9.0/angularfire.min.js"></script>
+	<script src="../angularfire-helper.js"></script>
+	
+	<script>
+		angular.module('firebaseHelperTest', ['firebaseHelper'])
+			.config(function($firebaseHelperProvider){
+				$firebaseHelperProvider.demo(true);
+				$firebaseHelperProvider.namespace('my-app');
+			})
+			.controller('AppCtrl', function($scope, $firebaseHelper){
+				$scope.auth = $firebaseHelper.auth();
+				
+				$scope.parentRef    = $firebaseHelper.ref('parent');
+				$scope.child1Inst   = $firebaseHelper.inst('parent', 'child1');
+				$scope.child2Object = $firebaseHelper.object('parent/child1/child2');
+				$scope.child3Array  = $firebaseHelper.array($scope.child2Object, 'child3');
+				$firebaseHelper.load($scope.child2Object, 'child3', true).then(function(child3){
+					$scope.child3Loaded = child3;
+				});
+				
+				$scope.populated    = $firebaseHelper.populate('keys', $scope.child3Array);
+			})
+	</script>
+</body>
+</html>
