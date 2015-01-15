@@ -36,7 +36,9 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
 ## API
 
-First, a note regarding the `[arguments…]` params below. If the first parameter is one of the following:
+### <a name="arguments"></a> First, a note regarding `arguments…`
+
+If the first parameter in any of the functions below is one of the following:
 
 * a `Firebase` reference,
 * a `$firebase` instance,
@@ -54,7 +56,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
 ### Authentication
 
-* `auth([arguments…])`
+* <code>auth([[arguments…](#arguments)])</code>
 
     **Returns**: an Angular-augmented authentication object.
     
@@ -63,14 +65,14 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
 ### Data Types
 
-* `ref([arguments…])`
+* <code>ref([[arguments…](#arguments)])</code>
 
     **Returns**: a `Firebase` reference at the API level, i.e. with no angular enhancements.
     
     **Replaces**: `new Firebase(path)`.
 
 
-* `inst([arguments…])`
+* <code>inst([[arguments…](#arguments)])</code>
 
     **Returns**: a `$firebase` instance.
     
@@ -85,31 +87,32 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
         $firebaseHelper.inst(ref);
 
 
-* `object([arguments…][, asArray])`
+* <code>object([[arguments…](#arguments)][, asArray])</code>
 
     **Returns**: a `$FirebaseObject`, or, if the last parameter === `true`, then a `$FirebaseArray`.
     
     **Replaces**: `$firebase().$asObject()` and `$firebase().$asArray()`, respectively.
 
 
-* `array([arguments…])`
+* <code>array([[arguments…](#arguments)])</code>
 
     **Returns**: a `$FirebaseArray`.
     
-    **Replaces**: shortcut for `$firebaseHelper.object([arguments…], true)`. 
+    **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)], true)</code>. 
+
+
+* <code>load([[arguments…](#arguments)][, asArray])</code>
+
+    **Returns**: a promise that resolves when the required resource is ready. The first param of the callback will be that loaded resource.
+    
+    **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)][, asArray]).$loaded()</code>.
 
 
 ### Utility
 
-* `load([arguments…][, asArray])`
-
-    **Returns**: a promise that resolves when the required resource is ready. The first param of the callback will be that loaded resource.
-    
-    **Replaces**: shortcut for `$firebaseHelper.object([arguments…], true).$loaded()`.
-
 * `populate(keys, values, cbAdded)`
 
-    **Returns**: an array of `$FirebaseObject`s. Both `keys` and `values` params work like `[arguments…]` in that they can be strings or special Firebase objects, or arrays thereof.
+    **Returns**: an array of `$FirebaseObject`s. Both `keys` and `values` params work like <code>[arguments…](#arguments)</code> in that they can be strings or special Firebase objects, or arrays thereof.
     
     `cbAdded` is a callback function that will be called every time a `values`-linked `$FirebaseObject` is loaded (the object itself being passed as a callback param). If the callback returns a promise, the `$FirebaseObject` won't be added to the populated array until that promise is resolved. e.g.
     
