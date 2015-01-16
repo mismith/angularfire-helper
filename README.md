@@ -20,6 +20,9 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
         .config(function($firebaseHelperProvider){
         	$firebaseHelperProvider.namespace('my-app');
+
+        	// if you want to test something on a `firebaseio-demo.com` domain, enable it like so:
+        	$firebaseHelperProvider.demo(true);
         })
 
 4. Include the `$firebaseHelper` service in place of the usual `$firebase` one
@@ -28,6 +31,7 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
             // old
             var ref = new Firebase('https://my-app.firebaseio.com/');
             $rootScope.myObject = $firebase(ref.child('myObject')).$asObject();
+
             // new
         	$rootScope.myObject = $firebaseHelper.object('myObject');
         })
@@ -50,8 +54,8 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     var ref  = $firebaseHelper.ref('parent'),
     	obj1 = $firebaseHelper.object(ref, 'child1/child2', 'child3'),
     	obj2 = $firebaseHelper.object('parent/child1/child2/child3');
-    
-    // obj1 === obj2
+
+    // obj1 == obj2
 
 
 ### Authentication
@@ -59,7 +63,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 * <code>auth([[arguments…](#arguments)])</code>
 
     **Returns**: an Angular-augmented authentication object.
-    
+
     **Replaces**: `$firebaseAuth(ref)`.
 
 
@@ -68,20 +72,20 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 * <code>ref([[arguments…](#arguments)])</code>
 
     **Returns**: a `Firebase` reference at the API level, i.e. with no angular enhancements.
-    
+
     **Replaces**: `new Firebase(path)`.
 
 
 * <code>inst([[arguments…](#arguments)])</code>
 
     **Returns**: a `$firebase` instance.
-    
+
     **Replaces**: `$firebase(ref)`.
-    
+
         // without $firebaseHelper
         $firebase(new Firebase(baseUrl + '/' + path + '/' + subpath1 + '/' + subpath2));
         $firebase(ref);
-        
+
         // with $firebaseHelper
         $firebaseHelper.inst(path, subpath1, subpath2);
         $firebaseHelper.inst(ref);
@@ -90,21 +94,21 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 * <code>object([[arguments…](#arguments)][, asArray])</code>
 
     **Returns**: a `$FirebaseObject`, or, if the last parameter === `true`, then a `$FirebaseArray`.
-    
+
     **Replaces**: `$firebase().$asObject()` and `$firebase().$asArray()`, respectively.
 
 
 * <code>array([[arguments…](#arguments)])</code>
 
     **Returns**: a `$FirebaseArray`.
-    
-    **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)], true)</code>. 
+
+    **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)], true)</code>.
 
 
 * <code>load([[arguments…](#arguments)][, asArray])</code>
 
     **Returns**: a promise that resolves when the required resource is ready. The first param of the callback will be that loaded resource.
-    
+
     **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)][, asArray]).$loaded()</code>.
 
 
@@ -113,21 +117,23 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 * `populate(keys, values, cbAdded)`
 
     **Returns**: an array of `$FirebaseObject`s. Both `keys` and `values` params work like <code>[arguments…](#arguments)</code> in that they can be strings or special Firebase objects, or arrays thereof.
-    
+
     `cbAdded` is a callback function that will be called every time a `values`-linked `$FirebaseObject` is loaded (the object itself being passed as a callback param). If the callback returns a promise, the `$FirebaseObject` won't be added to the populated array until that promise is resolved. e.g.
-    
+
         var delayedCount = 0;
         $scope.populated = $firebaseHelper.populate('keys', 'values', function(loadedValueObject){
             var deferred = $q.defer();
+
             $timeout(function(){
                 delayedCount++;
                 deferred.resolve(); // `$scope.populated` now contains `loadedValueObject`
             }, 2000);
+
             return deferred.promise;
         });
 
 * `intersect(keysPath, valuesPath[, keysMap[, valuesMap]])`
 
     Call `Firebase.util`s more thorough (but significantly slower) populating/intersecting algorithm.
-    
+
     **Requires**: external `Firebase.util` library, see: [https://github.com/firebase/firebase-util](https://github.com/firebase/firebase-util)
