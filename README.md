@@ -54,7 +54,8 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
 ### $firebaseHelper
 
-#### <a name="arguments"></a> First, a note regarding `arguments…`
+<a name="arguments"></a>
+#### `arguments…`
 
 If the first parameter in any of the respective functions below is one of the following:
 
