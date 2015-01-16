@@ -1,6 +1,6 @@
 {
   "name": "angularfire-helper",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "filename": "angularfire-helper.js",
   "license": "MIT",
   "author": "Murray Smith <murray@mismith.info>",
@@ -20,9 +20,6 @@
   },
   "bugs": {
     "url": "https://github.com/mismith/angularfire-helper/issues"
-  },
-  "dependencies": {
-    "npm": "*"
   },
   "devDependencies": {
     "gulp": "^3.8.10",

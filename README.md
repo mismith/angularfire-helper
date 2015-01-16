@@ -10,7 +10,7 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
         <script src="//cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
         <script src="//cdn.firebase.com/libs/angularfire/0.9.0/angularfire.min.js"></script>
-        <script src="//rawgit.com/mismith/angularfire-helper/1.1.0/angularfire-helper.min.js"></script>
+        <script src="//rawgit.com/mismith/angularfire-helper/1.1.1/angularfire-helper.min.js"></script>
 
 2. Include this library as a module dependency in your angular application (instead of `firebase`)
 
