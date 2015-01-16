@@ -40,9 +40,23 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
 ## API
 
-### <a name="arguments"></a> First, a note regarding `arguments…`
+### $firebaseHelperProvider
 
-If the first parameter in any of the functions below is one of the following:
+* `namespace([name])`
+
+    Gets or sets the name of your Firebase app, i.e. the subdomain part of a URL like: `https://<name>.firebaseio.com/`. You must configure this before calling any `$firebaseHelper` methods.
+
+* `demo([enable])`
+
+    Use a `firebaseio-demo.com` URL by passing boolean `true`.
+
+
+
+### $firebaseHelper
+
+#### <a name="arguments"></a> First, a note regarding `arguments…`
+
+If the first parameter in any of the respective functions below is one of the following:
 
 * a `Firebase` reference,
 * a `$firebase` instance,
@@ -58,7 +72,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     // obj1 == obj2
 
 
-### Authentication
+#### Authentication
 
 * <code>auth([[arguments…](#arguments)])</code>
 
@@ -67,7 +81,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     **Replaces**: `$firebaseAuth(ref)`.
 
 
-### Data Types
+#### Data Types
 
 * <code>ref([[arguments…](#arguments)])</code>
 
@@ -112,7 +126,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)][, asArray]).$loaded()</code>.
 
 
-### Utility
+#### Utility
 
 * `populate(keys, values, cbAdded)`
 
