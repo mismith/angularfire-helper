@@ -2,15 +2,15 @@
 
 Simplifies common AngularFire interactions by enhancing the flexibility and portability of the `$firebase` service.
 
-
+[![GitHub version](https://badge.fury.io/gh/mismith%2Fangularfire-helper.svg)](http://badge.fury.io/gh/mismith%2Fangularfire-helper)
 
 ## Setup
 
-1. Include Firebase and AngularFire dependencies, then this library
+1. Include Firebase and AngularFire dependencies, then this library (replace `X.X.X` with proper version)
 
         <script src="//cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
         <script src="//cdn.firebase.com/libs/angularfire/0.9.0/angularfire.min.js"></script>
-        <script src="//rawgit.com/mismith/angularfire-helper/1.1.1/angularfire-helper.min.js"></script>
+        <script src="//rawgit.com/mismith/angularfire-helper/X.X.X/angularfire-helper.min.js"></script>
 
 2. Include this library as a module dependency in your angular application (instead of `firebase`)
 
