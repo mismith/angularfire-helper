@@ -17,6 +17,7 @@ angular.module('firebaseHelper', ['firebase'])
 			return demo;
 		};
 
+		// private methods
 		var url = this.url = function(){
 			if( ! namespace) throw new Error('Firebase namespace not set, configure $firebaseHelperProvider.namespace(\'my-app\') before using $firebaseHelper.');
 			return 'https://' + namespace + '.firebaseio' + (demo ? '-demo' : '') + '.com/';
@@ -25,6 +26,7 @@ angular.module('firebaseHelper', ['firebase'])
 			return path.replace(/^\/+/, '');
 		};
 
+		// factory
 		this.$get = ['$firebase', '$firebaseAuth', '$q', function($firebase, $firebaseAuth, $q){
 			var self = this;
 
