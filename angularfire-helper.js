@@ -131,20 +131,24 @@ angular.module('firebaseHelper', ['firebase'])
 			};
 
 			// populate a list of keys with the values they reference
-			self.populate = function(keys, values, cbAdded){
+			self.populate = function(keys, values, cbAdded, cbAll){
 				var array   = [],
-					keysRef = $get(keys, 'ref');
+					keysRef = $get(keys, 'ref')
+					keysLength = 0;
 
 				// fire callback even if no keys found
 				keysRef.once('value', function(snapshot){
 					if( ! angular.isObject(snapshot.val())){
 						if(angular.isFunction(cbAdded)) cbAdded();
+						if(angular.isFunction(cbAll)) cbAll();
 					}
 				});
 
 				// watch for additions/deletions at keysRef
 				keysRef.on('child_added', function(snapshot){
 					var $item = $get([values, snapshot.key()], 'object');
+					
+					keysLength++;
 
 					$item.$loaded().then(function(){
 						var deferreds = [];
@@ -152,13 +156,17 @@ angular.module('firebaseHelper', ['firebase'])
 
 						$q.all(deferreds).then(function(){
 							array.push($item);
+							
+							if(array.length == keysLength && angular.isFunction(cbAll)) cbAll(array);
 						});
 					});
 				});
 				keysRef.on('child_removed', function(snapshot){
 					var i = -1,
 						$id = snapshot.key();
-
+					
+					keysLength--;
+					
 					angular.forEach(array, function(item, j){
 						if(i >= 0) return;
 						if(item.$id == $id) i = j;

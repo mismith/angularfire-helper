@@ -129,7 +129,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
 #### Utility
 
-* `populate(keys, values, cbAdded)`
+* `populate(keys, values, cbAdded, cbAll)`
 
     **Returns**: an array of `$FirebaseObject`s. Both `keys` and `values` params work like <code>[arguments…](#arguments)</code> in that they can be strings or special Firebase objects, or arrays thereof.
 
@@ -146,6 +146,8 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
             return deferred.promise;
         });
+
+    `cbAll` is a callback function that will be called once (more accurately, each time) the values array's length matches the keys array's length. In essence, this can be used as a quasi-`loaded` callback, useful for iterating/transforming/chaining the resultant array once all its children are loaded/ready.
 
 * `intersect(keysPath, valuesPath[, keysMap[, valuesMap]])`
 
