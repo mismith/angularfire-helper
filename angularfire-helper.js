@@ -38,22 +38,6 @@ angular.module('firebaseHelper', ['firebase'])
 				// first let's get everything to a Firebase Instance since we can get the others from there
 				if(angular.isString(input)){ // it's a string path
 					$inst = $firebase(new Firebase(url() + trim(input)));
-				}else if(angular.isArray(input)){ // it's an array
-					if(input.length){
-						if(angular.isString(input[0])){ // of string path chunks
-							$inst = $firebase(new Firebase(url() + trim(input.join('/'))));
-						}else{ // first item is a special object itself
-							// so let's recurse to get the first item as a Firebase Reference
-							var parent = input.shift(),
-								ref    = $get(parent, 'ref');
-
-							// then join the remaining arguments as a path to it's child
-							ref = ref.child(trim(input.join('/')));
-
-							// then wrap it for further processing
-							$inst = $firebase(ref);
-						}
-					}
 				}else if(angular.isObject(input)){
 					if(angular.isFunction(input.$inst)){ // it's a Firebase Object or Array
 						$inst = input.$inst();
@@ -61,8 +45,24 @@ angular.module('firebaseHelper', ['firebase'])
 						$inst = input;
 					}else if(angular.isFunction(input.child)){ // it's a Firebase Reference
 						$inst = $firebase(input);
+					}else if(angular.isArray(input)){ // it's an array
+						if(input.length){
+							if(angular.isString(input[0])){ // of string path chunks
+								$inst = $firebase(new Firebase(url() + trim(input.join('/'))));
+							}else{ // first item is a special object itself
+								// so let's recurse to get the first item as a Firebase Reference
+								var parent = input.shift(),
+									ref    = $get(parent, 'ref');
+	
+								// then join the remaining arguments as a path to it's child
+								ref = ref.child(trim(input.join('/')));
+	
+								// then wrap it for further processing
+								$inst = $firebase(ref);
+							}
+						}
 					}
-				}
+				} 
 				if( ! $inst){ // it's undefined or undetectable, so just use the root path
 					$inst = $firebase(new Firebase(url()));
 				}
@@ -91,8 +91,14 @@ angular.module('firebaseHelper', ['firebase'])
 			self.auth = function(){
 				return $firebaseAuth($get(Array.prototype.slice.call(arguments), 'ref'));
 			};
-
-
+			
+			
+			// get string path
+			self.path = function(item){
+				return $get(item, 'ref').toString().replace(url(), '');
+			};
+			
+			
 			// returns: Reference
 			self.ref = function(){
 				return $get(Array.prototype.slice.call(arguments), 'ref');
@@ -134,7 +140,7 @@ angular.module('firebaseHelper', ['firebase'])
 			self.populate = function(keys, values, cbAdded, cbAll){
 				var array   = [],
 					keysRef = $get(keys, 'ref');
-
+					
 				(function(keysLength){
 					// fire callback even if no keys found
 					keysRef.once('value', function(snapshot){
