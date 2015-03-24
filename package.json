@@ -1,11 +1,12 @@
 {
   "name": "angularfire-helper",
-  "version": "1.1.5",
+  "version": "2.0.0",
   "filename": "angularfire-helper.js",
   "license": "MIT",
   "author": "Murray Smith <murray@mismith.info>",
-  "description": "Simplifies common AngularFire interactions by enhancing the flexibility and portability of the `$firebase` service.",
+  "description": "Simplifies common AngularFire interactions by enhancing the flexibility and portability of the `firebase` module.",
   "keywords": [
+    "firebaseHelper",
     "angular",
     "angularjs",
     "firebase",
@@ -22,9 +23,11 @@
     "url": "https://github.com/mismith/angularfire-helper/issues"
   },
   "devDependencies": {
+    "browser-sync": "^2.4.0",
     "gulp": "^3.8.10",
     "gulp-ng-annotate": "^0.5.0",
     "gulp-rename": "^1.2.0",
-    "gulp-uglify": "^1.0.2"
+    "gulp-uglify": "^1.0.2",
+    "gulp-util": "^3.0.4"
   }
 }

@@ -1,5 +1,116 @@
 angular.module('firebaseHelper', ['firebase'])
 
+	.factory('$firebaseJoin', function($firebaseUtils, $firebaseArray, $firebaseObject, $q, $log){
+		return function(ref, srcRef){
+			var _proto = $firebaseArray.prototype;
+			var _loaded = $firebaseUtils.defer();
+			var _loadedPromises = [];
+			
+			var firebaseJoin = $firebaseArray.$extend({
+				$add: function(data){
+					this._assertNotDestroyed('$add');
+					var def = $firebaseUtils.defer();
+					
+					// add to srcRef first
+					var objectRef = srcRef.push($firebaseUtils.toJSON(data), $firebaseUtils.makeNodeResolver(def)),
+						key       = objectRef.key();
+					
+					if(key !== null){
+						return def.promise.then(function(){
+							// then add to local keys
+							return $firebaseUtils.doSet(ref.child(key), key).then(function(){
+								return objectRef;
+							});
+						});
+					}else{
+						return $firebaseUtils.reject('Error adding new record; could not determine new key for '+data);
+					}
+				},
+				$save: function(indexOrItem){
+					this._assertNotDestroyed('$save');
+					var self = this;
+					var item = self._resolveItem(indexOrItem);
+					var key = self.$keyAt(item);
+					if(key !== null){
+						// save to srcRef instead of locally
+						var objectRef = srcRef.child(key);
+						return $firebaseUtils.doSet(objectRef, $firebaseUtils.toJSON(item)).then(function(){
+							self.$$notify('child_changed', key);
+							return objectRef;
+						});
+					}else{
+						return $firebaseUtils.reject('Invalid record; could determine key for '+indexOrItem);
+					}
+				},
+				$remove: function(indexOrItem){
+					this._assertNotDestroyed('$remove');
+					var key = this.$keyAt(indexOrItem);
+					if(key !== null){
+						// remove from srcRef first
+						return $firebaseUtils.doRemove(srcRef.child(key)).then(function(){
+							// then remove local key
+							return $firebaseUtils.doRemove(ref.child(key));
+						});
+					}else{
+						return $firebaseUtils.reject('Invalid record; could not determine key for '+indexOrItem);
+					}
+				},
+				$unjoin: function(indexOrItem){
+					// keep srcRef intact, but remove local key
+					return _proto.$remove.apply(this, arguments);
+				},
+				
+				$$added: function(snap){
+					var self = this;
+					
+					// fetch src-joined object instead of local key value
+					var object = $firebaseObject(srcRef.child(snap.key()));
+					
+					// queue for $loaded()
+					_loadedPromises.push(object.$loaded());
+					
+					// @TODO: warn if loaded object doesn't exist / is null
+					
+					return object;
+				},
+				
+				$loaded: function(resolve, reject){
+					var self = this,
+						promise = _loaded.promise;
+					
+					if(arguments.length){
+						// allow this method to be called just like .then
+						// by passing any arguments on to .then
+						promise = promise.then.call(promise, resolve, reject);
+					}
+					
+					// call the default/parent $loaded() first to make sure the `keys` are all loaded (without params because we don't want our real promise to be ready until all `values` object have loaded)
+					_proto.$loaded.call(this)
+						.then(function(){
+							// keys are loaded, so now let's wait for all the values to load
+							$q.all(_loadedPromises)
+								.then(function(){
+									// values all loaded
+									_loaded.resolve(self.$list);
+								})
+								.catch(function(){
+									// one or many values failed to load
+									_loaded.reject('Unknown error; could not load all value objects.');
+								})
+						})
+						.catch(function(err){
+							// keys didn't load for some reason
+							_loaded.reject(err);
+						})
+					
+					return promise;
+				},
+			});
+			
+			return new firebaseJoin(ref);
+		};
+	})
+	
 	.provider('$firebaseHelper', function(){
 		var namespace = '',
 			demo      = false,
@@ -19,7 +130,7 @@ angular.module('firebaseHelper', ['firebase'])
 
 		// private methods
 		var url = this.url = function(){
-			if( ! namespace) throw new Error('Firebase namespace not set, configure $firebaseHelperProvider.namespace(\'my-app\') before using $firebaseHelper.');
+			if( ! namespace) throw new Error("Firebase namespace not set, configure $firebaseHelperProvider.namespace('my-app') before using $firebaseHelper.");
 			return 'https://' + namespace + '.firebaseio' + (demo ? '-demo' : '') + '.com/';
 		};
 		var trim = function(path){
@@ -27,61 +138,56 @@ angular.module('firebaseHelper', ['firebase'])
 		};
 
 		// factory
-		this.$get = ['$firebase', '$firebaseAuth', '$q', function($firebase, $firebaseAuth, $q){
+		this.$get = ['$firebaseAuth', '$firebaseArray', '$firebaseObject', '$firebaseJoin', '$q', function($firebaseAuth, $firebaseArray, $firebaseObject, $firebaseJoin, $q){
 			var self = this;
 
 			// auto-detects input and turns any supported special object or string path [chunks] into a specified type
 			var $get = self.$get = function(input, as){
-				var $inst,
-					path = as;
+				var ref,
+					path = as || 'ref';
 
 				// first let's get everything to a Firebase Instance since we can get the others from there
 				if(angular.isString(input)){ // it's a string path
-					$inst = $firebase(new Firebase(url() + trim(input)));
+					ref = new Firebase(url() + trim(input));
 				}else if(angular.isObject(input)){
-					if(angular.isFunction(input.$inst)){ // it's a Firebase Object or Array
-						$inst = input.$inst();
-					}else if(angular.isFunction(input.$ref)){ // it's a Firebase Instance
-						$inst = input;
+					if(angular.isFunction(input.$ref)){ // it's a Firebase Object or Array
+						ref = input.$ref();
 					}else if(angular.isFunction(input.child)){ // it's a Firebase Reference
-						$inst = $firebase(input);
+						ref = input;
 					}else if(angular.isArray(input)){ // it's an array
 						if(input.length){
 							if(angular.isString(input[0])){ // of string path chunks
-								$inst = $firebase(new Firebase(url() + trim(input.join('/'))));
+								ref = new Firebase(url() + trim(input.join('/')));
 							}else{ // first item is a special object itself
 								// so let's recurse to get the first item as a Firebase Reference
-								var parent = input.shift(),
-									ref    = $get(parent, 'ref');
-	
-								// then join the remaining arguments as a path to it's child
-								ref = ref.child(trim(input.join('/')));
-	
-								// then wrap it for further processing
-								$inst = $firebase(ref);
+								var parent    = $get(input.shift()),
+									childPath = trim(input.join('/'));
+								
+								// then join the remaining arguments as a path to its child
+								ref = childPath ? parent.child(childPath) : parent;
 							}
 						}
 					}
 				} 
-				if( ! $inst){ // it's undefined or undetectable, so just use the root path
-					$inst = $firebase(new Firebase(url()));
+				if( ! ref){ // it's undefined or undetectable, so just use the root path
+					ref = new Firebase(url());
 				}
 
 				// let's check if we have it cached already, and return that if so
-				path += $inst.$ref().path.toString();
+				path += ref.path.toString();
 				if(cache[path]) return cache[path];
 
 				// otherwise let's cache it and return it
 				switch(as){
-					case 'ref':
-						return cache[path] = $inst.$ref();
 					default:
-					case 'inst':
-						return cache[path] = $inst;
+					case 'ref':
+						return cache[path] = ref;
 					case 'object':
-						return cache[path] = $inst.$asObject();
+						return cache[path] = $firebaseObject(ref);
 					case 'array':
-						return cache[path] = $inst.$asArray();
+						return cache[path] = $firebaseArray(ref);
+					case 'join':
+						return cache[path] = $firebaseJoin(ref);
 				}
 			};
 
@@ -89,24 +195,19 @@ angular.module('firebaseHelper', ['firebase'])
 
 			// $firebaseAuth wrapper
 			self.auth = function(){
-				return $firebaseAuth($get(Array.prototype.slice.call(arguments), 'ref'));
+				return $firebaseAuth($get(Array.prototype.slice.call(arguments)));
 			};
 			
 			
 			// get string path
 			self.path = function(item){
-				return $get(item, 'ref').toString().replace(url(), '');
+				return $get(item).path.toString(); // @TODO: is .path dependable?
 			};
 			
 			
 			// returns: Reference
 			self.ref = function(){
-				return $get(Array.prototype.slice.call(arguments), 'ref');
-			};
-
-			// returns: Instance
-			self.inst = function(){
-				return $get(Array.prototype.slice.call(arguments), 'inst');
+				return $get(Array.prototype.slice.call(arguments));
 			};
 
 			// returns: Object [or Array]
@@ -129,76 +230,15 @@ angular.module('firebaseHelper', ['firebase'])
 				return self.object.apply(this, args);
 			};
 
-
+			// returns: Array of Objects
+			self.join = function(keys, values){
+				return $firebaseJoin($get(keys), $get(values));
+			};
 
 			// returns: promise for Object [or Array]
 			self.load = function(){
 				return self.object.apply(this, arguments).$loaded();
 			};
-
-			// populate a list of keys with the values they reference
-			self.populate = function(keys, values, cbAdded, cbAll){
-				var array   = [],
-					keysRef = $get(keys, 'ref');
-					
-				(function(keysLength){
-					// fire callback even if no keys found
-					keysRef.once('value', function(snapshot){
-						if( ! angular.isObject(snapshot.val())){
-							if(angular.isFunction(cbAdded)) cbAdded();
-							if(angular.isFunction(cbAll)) cbAll();
-						}
-					});
-	
-					// watch for additions/deletions at keysRef
-					keysRef.on('child_added', function(snapshot){
-						var $item = $get([values, snapshot.key()], 'object');
-	
-						keysLength++;
-	
-						$item.$loaded().then(function(){
-							var deferreds = [];
-							if(angular.isFunction(cbAdded)) deferreds.push(cbAdded($item));
-	
-							$q.all(deferreds).then(function(){
-								array.push($item);
-								
-								if(array.length == keysLength && angular.isFunction(cbAll)) cbAll(array);
-							});
-						});
-					});
-					keysRef.on('child_removed', function(snapshot){
-						var i = -1,
-							$id = snapshot.key();
-						
-						keysLength--;
-						
-						angular.forEach(array, function(item, j){
-							if(i >= 0) return;
-							if(item.$id == $id) i = j;
-						});
-						if(i >= 0) array.splice(i, 1);
-					});
-				})(0);
-				
-				return array;
-			};
-
-			// @requires: external Firebase.util library: https://github.com/firebase/firebase-util
-			self.intersect = function(keysPath, valuesPath, keysMap, valuesMap){
-				if( ! Firebase.util) throw new Error('$firebaseHelper.intersect() requires the `Firebase.util` external library. See: https://github.com/firebase/firebase-util');
-
-				// @TODO: cache somehow
-
-				var keysObj   = {ref: self.ref(keysPath)},
-					valuesObj = {ref: self.ref(valuesPath)};
-
-				if(keysMap)   keysObj.keyMap   = keysMap;
-				if(valuesMap) valuesObj.keyMap = valuesMap;
-
-				return $firebase(Firebase.util.intersection(keysObj, valuesObj)).$asArray();
-			};
-			//*/
 
 			return self;
 		}];

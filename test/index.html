@@ -2,23 +2,41 @@
 <html lang="en" ng-app="firebaseHelperTest">
 <head>
 	<meta charset="UTF-8">
+	<title>firebaseHelperTest</title>
+	<style>
+		.table { display: table; width: 100%; }
+		.table > * { display: table-cell; }
+	</style>
 </head>
 <body ng-controller="AppCtrl">
-	
-	<div style="display: table; width: 100%;">
-		<pre style="display: table-cell;"><h2>auth</h2>{{ auth }}</pre>
-		<pre style="display: table-cell;"><h2>parentRef</h2>{{ parentRef.path.toString() }}</pre>
-		<pre style="display: table-cell;"><h2>child1Inst</h2>{{ child1Inst.$ref().path.toString() }}</pre>
-		<pre style="display: table-cell;"><h2>child2Object</h2>{{ child2Object | json }}</pre>
-		<pre style="display: table-cell;"><h2>child3Array</h2>{{ child3Array | json }}</pre>
-		<pre style="display: table-cell;"><h2>child3Loaded</h2>{{ child3Loaded | json }}</pre>
-		<pre style="display: table-cell;"><h2>populated</h2>{{ populated | json }}</pre>
+	<div class="table">
+		<pre><h2>data</h2>{{ data | json }}</pre>
+		<pre><h2>child2Object</h2>{{ child2Object | json }}</pre>
+		<pre><h2>child3Array</h2>{{ child3Array | json }}</pre>
+		<pre><h2>child3Loaded</h2>{{ child3Loaded }}</pre>
+		<pre><h2>child3Path</h2>{{ child3Path }}</pre>
+	</div>
+	<div class="table">
+		<pre><h2>joinedKeys</h2>{{ joinedKeys | json }}</pre>
+		<pre><h2>joinedKeysLoaded</h2>{{ joinedKeysLoaded | json }}</pre>
+		<ul>
+			<li ng-repeat="key in joinedKeys">
+				<input type="text" ng-model="key.$value">
+				<button ng-click="joinedKeys.$save(key)">$save</button>
+				<button ng-click="joinedKeys.$remove(key)">$remove</button>
+				<button ng-click="joinedKeys.$unjoin(key)">$unjoin</button>
+			</li>
+			<li>
+				<input type="text" ng-model="add">
+				<button ng-click="joinedKeys.$add(add)">$add</button>
+			</li>
+		</ul>
 	</div>
 	
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
 	
-	<script src="//cdn.firebase.com/js/client/2.0.6/firebase.js"></script>
-	<script src="//cdn.firebase.com/libs/angularfire/0.9.0/angularfire.min.js"></script>
+	<script src="//cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
+	<script src="//cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
 	<script src="../angularfire-helper.js"></script>
 	
 	<script>
@@ -28,17 +46,44 @@
 				$firebaseHelperProvider.namespace('my-app');
 			})
 			.controller('AppCtrl', function($scope, $firebaseHelper){
-				$scope.auth = $firebaseHelper.auth();
+				// reset the test data every time we load
+				$firebaseHelper.ref().set({
+					parent: {
+						child1: {
+							child2: {
+								child3: {
+									value1: 1,
+									value2: 2,
+									value3: 3,
+									value4: 4,
+								},
+							},
+						},
+					},
+					keys: {
+						value1: 'value1',
+						value3: 'value3',
+					},
+				});
+				$scope.data = $firebaseHelper.object();
 				
+				// test all methods
+				$scope.auth = $firebaseHelper.auth();
 				$scope.parentRef    = $firebaseHelper.ref('parent');
-				$scope.child1Inst   = $firebaseHelper.inst('parent', 'child1');
 				$scope.child2Object = $firebaseHelper.object('parent/child1/child2');
 				$scope.child3Array  = $firebaseHelper.array($scope.child2Object, 'child3');
+				$scope.child3Loaded = false;
 				$firebaseHelper.load($scope.child2Object, 'child3', true).then(function(child3){
-					$scope.child3Loaded = child3;
+					$scope.child3Loaded = true;
 				});
+				$scope.child3Path   = $firebaseHelper.path($scope.child3Array);
 				
-				$scope.populated    = $firebaseHelper.populate('keys', $scope.child3Array);
+				// test all join submethods too
+				$scope.joinedKeys   = $firebaseHelper.join('keys', $scope.child3Array);
+				$scope.joinedKeysLoaded = false;
+				$scope.joinedKeys.$loaded().then(function(){
+					$scope.joinedKeysLoaded = true;
+				});
 			})
 	</script>
 </body>
