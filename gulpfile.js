@@ -8,17 +8,19 @@ var gulp         = require('gulp'),
 gulp
 	// compile
 	.task('build', function(){
-		gulp.watch('angularfire-helper.js', function(){
-			gulp.src('angularfire-helper.js')
-				.pipe(ngAnnotate())
-				.pipe(rename({suffix: '.min'}))
-				.pipe(uglify())
-				.pipe(gulp.dest('./'));
-		});
+		gulp.src('angularfire-helper.js')
+			.pipe(ngAnnotate())
+			.pipe(rename({suffix: '.min'}))
+			.pipe(uglify())
+			.pipe(gulp.dest('./'));
+	})
+	.task('watch', function(){
+		gulp.watch('angularfire-helper.js', ['build']);
 	})
 	
-	// watcher for testing
-	.task('watch', ['build'], function(){
+	
+	// live-updating for testing
+	.task('dev', ['watch'], function(){
 		browserSync.init({
 			files: ['*', 'test/*'],
 			server: {baseDir: './', directory: true},
@@ -30,4 +32,4 @@ gulp
 	})
 
 	// default
-	.task('default', ['watch'])
+	.task('default', ['dev']);
