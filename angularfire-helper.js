@@ -142,7 +142,7 @@ angular.module('firebaseHelper', ['firebase'])
 			var self = this;
 
 			// auto-detects input and turns any supported special object or string path [chunks] into a specified type
-			var $get = self.$get = function(input, as){
+			var get = self.get = function(input, as){
 				var ref,
 					path = as || 'ref';
 
@@ -160,7 +160,7 @@ angular.module('firebaseHelper', ['firebase'])
 								ref = new Firebase(url() + trim(input.join('/')));
 							}else{ // first item is a special object itself
 								// so let's recurse to get the first item as a Firebase Reference
-								var parent    = $get(input.shift()),
+								var parent    = get(input.shift()),
 									childPath = trim(input.join('/'));
 								
 								// then join the remaining arguments as a path to its child
@@ -195,19 +195,19 @@ angular.module('firebaseHelper', ['firebase'])
 
 			// $firebaseAuth wrapper
 			self.auth = function(){
-				return $firebaseAuth($get(Array.prototype.slice.call(arguments)));
+				return $firebaseAuth(get(Array.prototype.slice.call(arguments)));
 			};
 			
 			
 			// get string path
 			self.path = function(item){
-				return $get(item).path.toString(); // @TODO: is .path dependable?
+				return get(item).path.toString(); // @TODO: is .path dependable?
 			};
 			
 			
 			// returns: Reference
 			self.ref = function(){
-				return $get(Array.prototype.slice.call(arguments));
+				return get(Array.prototype.slice.call(arguments));
 			};
 
 			// returns: Object [or Array]
@@ -221,7 +221,7 @@ angular.module('firebaseHelper', ['firebase'])
 					args.pop();
 				}
 
-				return $get(args, type);
+				return get(args, type);
 			};
 			self.array = function(){
 				var args = Array.prototype.slice.call(arguments);
@@ -232,7 +232,7 @@ angular.module('firebaseHelper', ['firebase'])
 
 			// returns: Array of Objects
 			self.join = function(keys, values){
-				return $firebaseJoin($get(keys), $get(values));
+				return $firebaseJoin(get(keys), get(values));
 			};
 
 			// returns: promise for Object [or Array]
