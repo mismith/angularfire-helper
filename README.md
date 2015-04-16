@@ -1,6 +1,6 @@
 # AngularFire Helper
 
-Simplifies common AngularFire interactions by enhancing the flexibility and portability of the `$firebase` service.
+Simplifies common AngularFire interactions by enhancing the flexibility and portability of the `firebase` module.
 
 [![GitHub version](https://badge.fury.io/gh/mismith%2Fangularfire-helper.svg)](http://badge.fury.io/gh/mismith%2Fangularfire-helper)
 
@@ -25,11 +25,11 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
         	$firebaseHelperProvider.demo(true);
         })
 
-4. Include the `$firebaseHelper` service in place of `$firebase[Object|Array]`
+4. Include the `$firebaseHelper` service in place of `$FirebaseObject` and `$FirebaseArray`
 
         .controller('AppCtrl', function($scope, $firebaseHelper){
             // old
-            $scope.myObject = $firebaseObject(new Firebase('https://my-app.firebaseio.com/myObject'));
+            $scope.myObject = $FirebaseObject(new Firebase('https://my-app.firebaseio.com/myObject'));
 
             // new
         	$scope.myObject = $firebaseHelper.object('myObject');
@@ -59,8 +59,8 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 If the first parameter in any of the respective functions below is one of the following:
 
 * a `Firebase` reference,
-* a `$firebaseObject`, or
-* a `$firebaseArray`,
+* a `$FirebaseObject`, or
+* a `$FirebaseArray`,
 
 Then it will be detected as so, and the subsequent arguments will be treated as strings to be joined as a child path. The resulting node will therefore be a child of the first node. For example:
 
@@ -68,7 +68,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     	obj1 = $firebaseHelper.object(ref, 'child1/child2', 'child3'),
     	obj2 = $firebaseHelper.object('parent/child1/child2/child3');
 
-    // obj1 == obj2
+    // obj1 === obj2
 
 
 #### Authentication
@@ -91,14 +91,14 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
 * <code>object([[arguments…](#arguments)][, asArray])</code>
 
-    **Returns**: a `$firebaseObject`, or, if the last parameter === `true`, then a `$firebaseArray`.
+    **Returns**: a `$FirebaseObject`, or, if the last parameter === `true`, then a `$FirebaseArray`.
 
-    **Replaces**: `$firebaseObject()` and `$firebaseArray()`, respectively.
+    **Replaces**: `$FirebaseObject()` and `$FirebaseArray()`, respectively.
 
 
 * <code>array([[arguments…](#arguments)])</code>
 
-    **Returns**: a `$firebaseArray`.
+    **Returns**: a `$FirebaseArray`.
 
     **Replaces**: shortcut for <code>$firebaseHelper.object([[arguments…](#arguments)], true)</code>.
 
@@ -112,6 +112,6 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
 * <code>join([keys…](#arguments), [values…](#arguments))</code>
 
-    **Returns**: a special `$firebaseArray` of `$firebaseObject`s, whereupon methods affecting the relationships between keys and values will be automatically taken into account. Both `keys…` and `values…` params work like <code>[arguments…](#arguments)</code> in that they can be strings, or special Firebase objects, or arrays thereof.
+    **Returns**: a special `$FirebaseArray` of `$FirebaseObject`s, whereupon methods affecting the relationships between keys and values will be automatically taken into account. Both `keys…` and `values…` params work like <code>[arguments…](#arguments)</code> in that they can be strings, or special Firebase objects, or arrays thereof.
 
-    **Replaces**: wrapper for custom `$firebaseJoin` service (which extends the native `$firebaseArray`).
+    **Replaces**: wrapper for custom `$firebaseJoin` service (which extends the native `$FirebaseArray`).
