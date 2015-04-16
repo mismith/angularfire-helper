@@ -184,7 +184,7 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
             myObject = $firebaseHelper.object('parent'),
             joined   = $firebaseHelper.join(keys, [myObject, 'child1']);
 
-      `joined` contains all children of `/parent/child1` whose `$id` is present in `/keys`
+      `joined` contains all children of `/parent/child1` whose `$id`s are present in `/keys`
 
 
 <a name="firebasejoin"></a>
@@ -278,6 +278,10 @@ All `$firebaseArray`-like methods are provided, including new and augmented func
 
       value3.$value += 2;
       joined.$save('value3');
+
+      // can also do this instead:
+      value3.$value += 2;
+      value3.$save();
 
   <table>
     <tr>
