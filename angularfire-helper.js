@@ -1,5 +1,6 @@
-angular.module('firebaseHelper', ['firebase'])
-
+!(function(){
+	angular.module('firebaseHelper', ['firebase'])
+	
 	.factory('$firebaseJoin', function($firebaseUtils, $firebaseArray, $firebaseObject, $q, $log){
 		return function(ref, srcRef){
 			var _proto = $firebaseArray.prototype;
@@ -115,19 +116,19 @@ angular.module('firebaseHelper', ['firebase'])
 		var namespace = '',
 			demo      = false,
 			cache     = {};
-
+		
 		// get or set namespace/Firebase reference domain
 		this.namespace = function(set){
 			if(set !== undefined) namespace = set;
 			return namespace;
 		};
-
+		
 		// is this a demo url?
 		this.demo = function(set){
 			if(set !== undefined) demo = set;
 			return demo;
 		};
-
+		
 		// private methods
 		var url = this.url = function(){
 			if( ! namespace) throw new Error("Firebase namespace not set, configure $firebaseHelperProvider.namespace('my-app') before using $firebaseHelper.");
@@ -136,16 +137,16 @@ angular.module('firebaseHelper', ['firebase'])
 		var trim = function(path){
 			return path.replace(/^\/+/, '');
 		};
-
+		
 		// factory
 		this.$get = ['$firebaseAuth', '$firebaseArray', '$firebaseObject', '$firebaseJoin', '$q', function($firebaseAuth, $firebaseArray, $firebaseObject, $firebaseJoin, $q){
 			var self = this;
-
+			
 			// auto-detects input and turns any supported special object or string path [chunks] into a specified type
 			var get = self.get = function(input, as){
 				var ref,
 					path = as || 'ref';
-
+				
 				// first let's get everything to a Firebase Instance since we can get the others from there
 				if(angular.isString(input)){ // it's a string path
 					ref = new Firebase(url() + trim(input));
@@ -172,11 +173,11 @@ angular.module('firebaseHelper', ['firebase'])
 				if( ! ref){ // it's undefined or undetectable, so just use the root path
 					ref = new Firebase(url());
 				}
-
+				
 				// let's check if we have it cached already, and return that if so
 				path += ref.path.toString();
 				if(cache[path]) return cache[path];
-
+				
 				// otherwise let's cache it and return it
 				switch(as){
 					default:
@@ -190,56 +191,53 @@ angular.module('firebaseHelper', ['firebase'])
 						return cache[path] = $firebaseJoin(ref);
 				}
 			};
-
-
-
+			
 			// $firebaseAuth wrapper
 			self.auth = function(){
 				return $firebaseAuth(get(Array.prototype.slice.call(arguments)));
 			};
-			
 			
 			// get string path
 			self.path = function(item){
 				return get(item).path.toString(); // @TODO: is .path dependable?
 			};
 			
-			
 			// returns: Reference
 			self.ref = function(){
 				return get(Array.prototype.slice.call(arguments));
 			};
-
+			
 			// returns: Object [or Array]
 			// N.B. if last argument === true, return Array instead of Object
 			self.object = function(){
 				var args = Array.prototype.slice.call(arguments),
 					type = 'object';
-
+				
 				if(args[args.length - 1] === true){
 					type = 'array';
 					args.pop();
 				}
-
+				
 				return get(args, type);
 			};
 			self.array = function(){
 				var args = Array.prototype.slice.call(arguments);
 				args.push(true); // append true as last argument
-
+				
 				return self.object.apply(this, args);
 			};
-
+			
 			// returns: Array of Objects
 			self.join = function(keys, values){
 				return $firebaseJoin(get(keys), get(values));
 			};
-
+			
 			// returns: promise for Object [or Array]
 			self.load = function(){
 				return self.object.apply(this, arguments).$loaded();
 			};
-
+			
 			return self;
 		}];
 	});
+})();

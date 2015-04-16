@@ -6,13 +6,13 @@ Simplifies common AngularFire interactions by enhancing the flexibility and port
 
 ## Setup
 
-1. Include Firebase (2.2.3+) and AngularFire (1.0.0+) dependencies, then this library (replace `X.X.X` with proper version)
+1. Include Firebase (2.2.3+) and AngularFire (1.0.0+) dependencies, then this library (replace `X.X.X` with latest version)
 
-        <script src="//cdn.firebase.com/js/client/X.X.X/firebase.js"></script>
-        <script src="//cdn.firebase.com/libs/angularfire/X.X.X/angularfire.min.js"></script>
-        <script src="//rawgit.com/mismith/angularfire-helper/X.X.X/angularfire-helper.min.js"></script>
+        <script src="//cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
+        <script src="//cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
+        <script src="//cdn.rawgit.com/mismith/angularfire-helper/X.X.X/angularfire-helper.min.js"></script>
 
-2. Include this library as a module dependency in your angular application (_instead of_ `firebase`)
+2. Include this library as a module dependency in your angular application (can replace `firebase`)
 
         angular.module('my-app', ['firebaseHelper'])
 
