@@ -361,13 +361,56 @@ All `$firebaseArray`-like methods are provided, including new and augmented func
     </tr>
   </table>
 
-* `$unjoin(indexOrItem)`
+* `$link(key)`
+
+  Add an existing value object based on its `key`.
+
+  **Example**:
+
+      $firebaseJoin('keys', 'parent/child1').$link('value3')
+
+  <table>
+    <tr>
+      <td><pre>
+  {
+    keys: {
+      value1: 'value1'
+    },
+    parent: {
+      child1: {
+        value1: 1,
+        value2: 2,
+        value3: 3,
+        value4: 4
+      }
+    }
+  }</pre></td>
+      <td>&rarr;</td>
+      <td valign="top"><pre>
+  {
+    keys: {
+      value1: 'value1',
+      value3: 'value3'
+    },
+    parent: {
+      child1: {
+        value1: 1,
+        value2: 2,
+        value3: 3,
+        value4: 4
+      }
+    }
+  }</pre></td>
+    </tr>
+  </table>
+
+* `$unlink(indexOrItem)`
 
   Delete an existing key from `keys` but leave its value object intact in `values`.
 
   **Example**:
 
-      $firebaseJoin('keys', 'parent/child1').$unjoin('value3')
+      $firebaseJoin('keys', 'parent/child1').$unlink('value3')
 
   <table>
     <tr>
