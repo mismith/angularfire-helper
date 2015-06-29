@@ -56,7 +56,12 @@
 						return $firebaseUtils.reject('Invalid record; could not determine key for '+indexOrItem);
 					}
 				},
-				$unjoin: function(indexOrItem){
+				
+				$link: function(key){
+					// leave srcRef untouched, but add local key
+					return $firebaseUtils.doSet(ref.child(key), key);
+				},
+				$unlink: function(indexOrItem){
 					// keep srcRef intact, but remove local key
 					return _proto.$remove.apply(this, arguments);
 				},
