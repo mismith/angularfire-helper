@@ -2,6 +2,8 @@
 	angular.module('firebaseHelper', ['firebase'])
 	
 	.factory('$firebaseJoin', function($firebaseUtils, $firebaseArray, $firebaseObject, $q, $log){
+		var cache = {};
+		
 		return function(ref, srcRef){
 			var _proto = $firebaseArray.prototype;
 			var _loaded = $firebaseUtils.defer();
@@ -70,7 +72,9 @@
 					var self = this;
 					
 					// fetch src-joined object instead of local key value
-					var object = $firebaseObject(srcRef.child(snap.key()));
+					var ref    = srcRef.child(snap.key()),
+						path   = ref.path.toString(),
+						object = cache[path] || (cache[path] = $firebaseObject(ref));
 					
 					// queue for $loaded()
 					_loadedPromises.push(object.$loaded());
