@@ -73,7 +73,7 @@
 					
 					// fetch src-joined object instead of local key value
 					var ref    = srcRef.child(snap.key()),
-						path   = ref.path.toString(),
+						path   = 'object' + ref.path.toString(),
 						object = cache[path] || (cache[path] = $firebaseObject(ref));
 					
 					// queue for $loaded()
@@ -117,7 +117,8 @@
 				},
 			});
 			
-			return new firebaseJoin(ref);
+			var path = 'join' + ref.path.toString() + '+' + srcRef.path.toString();
+			return cache[path] || (cache[path] = new firebaseJoin(ref));
 		};
 	})
 	
