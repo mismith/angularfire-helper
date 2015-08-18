@@ -190,30 +190,36 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 <a name="firebasejoin"></a>
 ## $firebaseJoin
 
-Allows access to an filtered array of data objects as if it were a normal `$firebaseArray`, where key-value-associations are automatically taken into account.
+* <code>$firebaseJoin([keysRef, ]valuesRef)</code>
 
-_i.e._ Given a Firebase data structure like this:
-
-    {
-      keys: {
-        value1: 'value1',
-        value3: 'value3'
-      },
-      parent: {
-        child1: {
-          value1: 1,
-          value2: 2,
-          value3: 3,
-          value4: 4
+    **Returns**: an augmented `$firebaseArray` of `$firebaseObjects`, including only the `$firebaseObjects` from `valuesRef` whose keys appear in the `$firebaseArray` at `keysRef`. _i.e._ Given a Firebase data structure like this:
+    
+        {
+          keys: {
+            value1: 'value1',
+            value3: 'value3'
+          },
+          parent: {
+            child1: {
+              value1: 1,
+              value2: 2,
+              value3: 3,
+              value4: 4
+            }
+          }
         }
-      }
-    }
-
-<p></p>
-
-    $firebaseJoin('keys', 'parent/child1').$loaded(function(data){
-      // data == {value1: 1, value3: 3};
-    })
+    
+    <p></p>
+    
+        $firebaseJoin($firebaseHelper.ref('keys'), $firebaseHelper.ref('parent/child1')).$loaded(function(data){
+          // data == [{$id: 'value1', $value: 1}, {$id: value3, $value: 3}];
+        });
+    
+    Can also be used with only one argument to get a `$firebaseArray` of `$firebaseObjects` for any path. _e.g._ 
+    
+        $firebaseJoin($firebaseHelper.ref('parent/child1')).$loaded(function(data){
+          // data == [{$id: 'value1', $value: 1}, {$id: 'value2', $value: 2}, {$id: 'value3', $value: 3}, {$id: value4, $value: 4}];
+        });
 
 ### Manipulation
 

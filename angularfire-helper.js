@@ -5,9 +5,11 @@
 		var cache = {};
 		
 		return function(ref, srcRef){
-			var _proto = $firebaseArray.prototype;
-			var _loaded = $firebaseUtils.defer();
-			var _loadedPromises = [];
+			srcRef = srcRef || ref; // allows for syntax like: `$firebaseJoin(ref)` to product $firebaseArray of $firebaseObjects (as opposed to a $firebaseArray of JS objects if $firebaseJoin wasn't used)
+			
+			var _proto          = $firebaseArray.prototype,
+				_loaded         = $firebaseUtils.defer(),
+				_loadedPromises = [];
 			
 			var firebaseJoin = $firebaseArray.$extend({
 				$add: function(data){
