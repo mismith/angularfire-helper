@@ -107,7 +107,7 @@
 								})
 								.catch(function(){
 									// one or many values failed to load
-									_loaded.reject('Unknown error; could not load all value objects.');
+									_loaded.reject('Could not load all value objects.');
 								})
 						})
 						.catch(function(err){
