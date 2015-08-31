@@ -31,13 +31,14 @@
 				<button ng-click="joinedKeys.$add(add)">$add</button>
 			</li>
 		</ul>
+		<pre><h2>joinedValues</h2>{{ joinedValues | json }}</pre>
 	</div>
 	
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
 	
 	<script src="//cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
 	<script src="//cdn.firebase.com/libs/angularfire/1.0.0/angularfire.min.js"></script>
-	<script src="../angularfire-helper.js"></script>
+	<script src="angularfire-helper.js"></script>
 	
 	<script>
 		angular.module('firebaseHelperTest', ['firebaseHelper'])
@@ -84,6 +85,7 @@
 				$scope.joinedKeys.$loaded().then(function(){
 					$scope.joinedKeysLoaded = true;
 				});
+				$scope.joinedValues = $firebaseHelper.join('parent/child1/child2/child3');
 			})
 	</script>
 </body>

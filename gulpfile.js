@@ -22,8 +22,8 @@ gulp
 	// live-updating for testing
 	.task('dev', ['watch'], function(){
 		browserSync.init({
-			files: ['*', 'test/*'],
-			server: {baseDir: './', directory: true},
+			files: ['*'],
+			server: {baseDir: './'},
 			watchOptions: {debounce: 400},
 			ghostMode: false,
 			notify: false,
