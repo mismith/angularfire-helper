@@ -241,7 +241,7 @@
 			
 			// returns: Array of Objects
 			self.join = function(keys, values){
-				return $firebaseJoin(get(keys), values ? get(values) : undefined);
+				return $firebaseJoin(get(keys), values !== undefined ? get(values) : undefined);
 			};
 			
 			// returns: promise for Object [or Array]
