@@ -8,6 +8,7 @@ Simplifies common [AngularFire](https://github.com/firebase/angularfire) interac
 - **simpler dependencies**; inject only one service instead of three (`$firebaseObject`+`$firebaseArray`+`$firebaseAuth` &rarr; `$firebaseHelper`)
 - **improved performance**; caches all three Firebase data types (reference, object, array)
 - **augmented 'joins'**; access normalized data via key-object-association
+- **added convenience**; add the missing `$update` method to `$firebaseObject`
 
 # Setup
 
@@ -24,13 +25,13 @@ Simplifies common [AngularFire](https://github.com/firebase/angularfire) interac
 
 3. Set your Firebase namespace
 
-        .config(function($firebaseHelperProvider){
+        .config(function ($firebaseHelperProvider) {
             $firebaseHelperProvider.namespace('my-app');
         })
 
 4. Include the `$firebaseHelper` service (in place of `$firebaseObject`, `$firebaseArray`, and `$firebaseAuth`)
 
-        .controller('AppCtrl', function($scope, $firebaseHelper){
+        .controller('AppCtrl', function ($scope, $firebaseHelper) {
             $scope.myObject = $firebaseHelper.object('myObject');
         })
 
@@ -46,7 +47,7 @@ Simplifies common [AngularFire](https://github.com/firebase/angularfire) interac
 
     **Example**:
 
-        .config(function($firebaseHelperProvider){
+        .config(function ($firebaseHelperProvider) {
           $firebaseHelperProvider.namespace('my-app');
         })
 
@@ -56,9 +57,28 @@ Simplifies common [AngularFire](https://github.com/firebase/angularfire) interac
 
     **Example**:
 
-        .config(function($firebaseHelperProvider){
+        .config(function ($firebaseHelperProvider) {
           $firebaseHelperProvider.demo(true);
         })
+
+
+## $firebaseObject
+
+* `$update(newData)`
+
+    **Returns**: the promise from `$firebaseObject.$save()`
+
+    **Replaces**: having to manually handle promise wrapping
+
+    **Example**:
+
+        // old (pseudo)
+        var child1 = $firebaseObject(new Firebase(BASE_URL + 'parent/child1'));
+        child1.$value = newValue;
+        child1.$save().then(function (child1) {});
+        
+        // new
+        $firebaseHelper.object('parent/child1').$update(dataObj).then(function (child1) {});
 
 
 ## $firebaseHelper
@@ -162,10 +182,10 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
 
         var old, new;
 
-        $firebaseArray(new Firebase(BASE_URL + 'parent/child1')).$loaded().then(function(child1){
+        $firebaseArray(new Firebase(BASE_URL + 'parent/child1')).$loaded().then(function (child1) {
           old = child1;
         });
-        $firebaseHelper.load('parent/child1', true).then(function(child1){
+        $firebaseHelper.load('parent/child1', true).then(function (child1) {
           new = child1;
         });
 
@@ -211,13 +231,13 @@ Then it will be detected as so, and the subsequent arguments will be treated as 
     
     <p></p>
     
-        $firebaseJoin($firebaseHelper.ref('keys'), $firebaseHelper.ref('parent/child1')).$loaded(function(data){
+        $firebaseJoin($firebaseHelper.ref('keys'), $firebaseHelper.ref('parent/child1')).$loaded(function (data) {
           // data == [{$id: 'value1', $value: 1}, {$id: value3, $value: 3}];
         });
     
     Can also be used with only one argument to get a `$firebaseArray` of `$firebaseObjects` for any path. _e.g._ 
     
-        $firebaseJoin($firebaseHelper.ref('parent/child1')).$loaded(function(data){
+        $firebaseJoin($firebaseHelper.ref('parent/child1')).$loaded(function (data) {
           // data == [{$id: 'value1', $value: 1}, {$id: 'value2', $value: 2}, {$id: 'value3', $value: 3}, {$id: value4, $value: 4}];
         });
 

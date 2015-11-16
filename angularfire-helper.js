@@ -1,6 +1,19 @@
 !(function(){
 	angular.module('firebaseHelper', ['firebase'])
 	
+	.config(function($provide) {
+		// add $update convenience method to $firebaseObject
+		$provide.decorator('$firebaseObject', function($delegate) {
+			$delegate.prototype.$update = function (data) {
+				angular.forEach(data, function (v, k) {
+					if (/^[a-zA-Z0-9-_]*$/.test(k)) this[k] = v;
+				}, this);
+				return this.$save();
+			};
+			return $delegate;
+		});
+	})
+	
 	.factory('$firebaseJoin', function($firebaseUtils, $firebaseArray, $firebaseObject, $q, $log){
 		var cache = {};
 		
