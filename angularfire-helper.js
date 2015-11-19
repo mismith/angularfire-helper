@@ -139,6 +139,7 @@
 	
 	.provider('$firebaseHelper', function(){
 		var namespace = '',
+			root      = '',
 			demo      = false,
 			cache     = {};
 		
@@ -154,10 +155,16 @@
 			return demo;
 		};
 		
+		// get or set root reference path
+		this.root = function(set){
+			if(set !== undefined) root = set;
+			return root;
+		};
+		
 		// private methods
 		var url = this.url = function(){
 			if( ! namespace) throw new Error("Firebase namespace not set, configure $firebaseHelperProvider.namespace('my-app') before using $firebaseHelper.");
-			return 'https://' + namespace + '.firebaseio' + (demo ? '-demo' : '') + '.com/';
+			return 'https://' + namespace + '.firebaseio' + (demo ? '-demo' : '') + '.com/' + (root ? root + '/' : '');
 		};
 		var trim = function(path){
 			return path.replace(/^\/+/, '');

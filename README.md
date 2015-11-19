@@ -61,6 +61,18 @@ Simplifies common [AngularFire](https://github.com/firebase/angularfire) interac
           $firebaseHelperProvider.demo(true);
         })
 
+* `root(path)`
+
+    Optional. Gets or sets the root path of your Firebase app's data. All `$firebaseHelper` calls will append this path to the base URL. Defaults to `''` (empty).
+    
+    **Example**:
+    
+         // if all your data lives under `https://my-app.firebaseio.com/data/…`, then call:
+         
+        .config(function ($firebaseHelperProvider) {
+          $firebaseHelperProvider.root('data');
+        })
+
 
 ## $firebaseObject
 
